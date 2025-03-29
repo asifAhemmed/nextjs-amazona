@@ -136,3 +136,7 @@
 @utility highlight-link{
   @apply text-sky-700  hover:text-orange-700 hover:underline;
 }
+
+@utility flex-between {
+  @apply flex justify-between items-center;
+}
