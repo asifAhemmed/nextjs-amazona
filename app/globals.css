@@ -132,3 +132,7 @@
 @utility h2-bold {
   @apply font-bold text-lg lg:text-xl;
 }
+
+@utility highlight-link{
+  @apply text-sky-700  hover:text-orange-700 hover:underline;
+}

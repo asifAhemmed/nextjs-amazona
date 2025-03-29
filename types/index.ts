@@ -20,8 +20,12 @@ export type Data = {
 
   import {
     CartSchema,
-    OrderItemSchema,
-    ProductInputSchema,
+    OrderItemSchema
   } from '@/lib/validator'
   export type OrderItem = z.infer<typeof OrderItemSchema>
   export type Cart = z.infer<typeof CartSchema>
+
+
+// user
+export type IUserInput = z.infer<typeof UserInputSchema>
+export type IUserSignIn = z.infer<typeof UserSignInSchema>
