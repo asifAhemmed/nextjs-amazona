@@ -246,7 +246,8 @@ export const DeliveryDateSchema = z.object({
 })
 
 export const SettingInputSchema = z.object({
- 
+  // PROMPT: create fields
+  // codeium, based on the mongoose schema for settings
   common: z.object({
     pageSize: z.coerce
       .number()
