@@ -145,6 +145,6 @@
   @apply p-3 hover:bg-muted hover:no-underline;
 }
 
-@utility  web-page-content p {
+@utility  web-page-content  {
   @apply py-2;
 }
