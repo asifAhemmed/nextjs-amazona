@@ -1,115 +1,57 @@
-'use client'
-import { redirect, useSearchParams } from 'next/navigation'
+import { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import Link from 'next/link'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { useForm } from 'react-hook-form'
-import { IUserSignIn } from '@/types'
-import { signInWithCredentials } from '@/lib/actions/user.actions'
+import { auth } from "@/auth";
+import SeparatorWithOr from "@/components/shared/separator-or";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { toast } from "sonner"
-import { zodResolver } from '@hookform/resolvers/zod'
-import { UserSignInSchema } from '@/lib/validator'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
-import { APP_NAME } from '@/lib/constants'
+import CredentialsSignInForm from "./credentials-signin-form";
+import { Button } from "@/components/ui/button";
+import { APP_NAME } from "@/lib/constants";
+import { GoogleSignInForm } from "./google-signin-form";
 
-const signInDefaultValues =
-  process.env.NODE_ENV === 'development'
-    ? {
-        email: 'admin@example.com',
-        password: '123456',
-      }
-    : {
-        email: '',
-        password: '',
-      }
+export const metadata: Metadata = {
+  title: "Sign In",
+};
 
-export default function CredentialsSignInForm() {
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/'
+export default async function SignIn(props: {
+  searchParams: Promise<{
+    callbackUrl: string;
+  }>;
+}) {
+  const searchParams = await props.searchParams;
 
-  const form = useForm<IUserSignIn>({
-    resolver: zodResolver(UserSignInSchema),
-    defaultValues: signInDefaultValues,
-  })
+  const { callbackUrl = "/" } = searchParams;
 
-  const { control, handleSubmit } = form
-
-  const onSubmit = async (data: IUserSignIn) => {
-    try {
-      await signInWithCredentials({
-        email: data.email,
-        password: data.password,
-      })
-      redirect(callbackUrl)
-    } catch (error) {
-      if (isRedirectError(error)) {
-        throw error
-      }
-      toast({
-        title: 'Error',
-        description: 'Invalid email or password',
-        variant: 'destructive',
-      })
-    }
+  const session = await auth();
+  if (session) {
+    return redirect(callbackUrl);
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <input type='hidden' name='callbackUrl' value={callbackUrl} />
-        <div className='space-y-6'>
-          <FormField
-            control={control}
-            name='email'
-            render={({ field }) => (
-              <FormItem className='w-full'>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter email address' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={control}
-            name='password'
-            render={({ field }) => (
-              <FormItem className='w-full'>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input
-                    type='password'
-                    placeholder='Enter password'
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
+    <div className="w-full">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Sign In</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div>
-            <Button type='submit'>Sign In</Button>
+            <CredentialsSignInForm />
           </div>
-          <div className='text-sm'>
-            By signing in, you agree to {APP_NAME}&apos;s{' '}
-            <Link href='/page/conditions-of-use'>Conditions of Use</Link> and{' '}
-            <Link href='/page/privacy-policy'>Privacy Notice.</Link>
+          <SeparatorWithOr />
+          <div className="mt-4">
+            <GoogleSignInForm />
           </div>
-        </div>
-      </form>
-    </Form>
-  )
+        </CardContent>
+      </Card>
+      <SeparatorWithOr>New to {APP_NAME}?</SeparatorWithOr>
+
+      <Link href={`/sign-up?callbackUrl=${encodeURIComponent(callbackUrl)}`}>
+        <Button className="w-full" variant="outline">
+          Create your {APP_NAME} account
+        </Button>
+      </Link>
+    </div>
+  );
 }
